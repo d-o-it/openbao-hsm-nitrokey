@@ -1,12 +1,11 @@
-# We will pass the version as an argument
+# Use the Alpine-based HSM image
 ARG BAO_VERSION=latest
-FROM openbao/openbao-hsm-ubi:${BAO_VERSION}
+FROM openbao/openbao-hsm:${BAO_VERSION}
 
 USER root
 
-# Install OpenSC and PC/SC Lite natively
-RUN microdnf update -y && \
-    microdnf install -y opensc pcsc-lite-libs && \
-    microdnf clean all
-    
+# Alpine's package manager is incredibly reliable for this
+RUN apk add --no-cache opensc pcsc-lite-libs
+
+# Switch back to the bao user
 USER bao
