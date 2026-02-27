@@ -7,5 +7,5 @@ USER root
 # Alpine's package manager is incredibly reliable for this
 RUN apk add --no-cache opensc pcsc-lite-libs
 
-# Switch back to the bao user
-USER bao
+# Switch back to the openbao user
+USER openbao
