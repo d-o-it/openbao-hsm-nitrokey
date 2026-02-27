@@ -2,8 +2,8 @@ name: Scheduled Build
 
 on:
   schedule:
-    - cron: '0 */12 * * *' # Check every 12 hours
-  workflow_dispatch:      # Allow manual triggers
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
 
 jobs:
   check-and-build:
@@ -19,11 +19,25 @@ jobs:
       - name: Get latest OpenBao version
         id: get_version
         run: |
-          # Fetch the latest release tag from OpenBao's repo
           VERSION=$(curl -s https://api.github.com/repos/openbao/openbao/releases/latest | jq -r .tag_name | sed 's/v//')
           echo "latest_version=$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Check if version exists in GHCR
+        id: check_ghcr
+        run: |
+          # We check if the specific version tag already exists in your registry
+          IMAGE_URL="docker://ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.latest_version }}"
+          
+          if skopeo inspect "$IMAGE_URL" > /dev/null 2>&1; then
+            echo "Version ${{ steps.get_version.outputs.latest_version }} already exists in GHCR. Skipping build."
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "New version detected! Proceeding to build."
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Log in to GitHub Container Registry
+        if: steps.check_ghcr.outputs.exists == 'false'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -31,6 +45,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push
+        if: steps.check_ghcr.outputs.exists == 'false'
         uses: docker/build-push-action@v5
         with:
           context: .
