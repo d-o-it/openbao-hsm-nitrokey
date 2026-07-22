@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '0 */12 * * *'
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Rebuild even if the version tag already exists in GHCR'
+        type: boolean
+        default: false
 
 jobs:
   check-and-build:
@@ -28,7 +33,7 @@ jobs:
           # We check if the specific version tag already exists in your registry
           IMAGE_URL="docker://ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.latest_version }}"
           
-          if skopeo inspect "$IMAGE_URL" > /dev/null 2>&1; then
+          if skopeo inspect "$IMAGE_URL" > /dev/null 2>&1 && [ "${{ inputs.force }}" != "true" ]; then
             echo "Version ${{ steps.get_version.outputs.latest_version }} already exists in GHCR. Skipping build."
             echo "exists=true" >> $GITHUB_OUTPUT
           else
