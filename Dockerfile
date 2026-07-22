@@ -1,3 +1,6 @@
+# Declared before the first FROM so it stays usable in FROM lines below.
+ARG BAO_VERSION=latest
+
 # Build the PKCS#11 KMS seal plugin from source with musl cgo so it runs on
 # the Alpine base image and can dlopen the apk-installed opensc-pkcs11.so.
 # The upstream prebuilt plugin binaries are glibc-linked and unusable here.
@@ -15,7 +18,6 @@ WORKDIR /src
 RUN CGO_ENABLED=1 go build -trimpath -o /openbao-plugin-kms-pkcs11 ./kms/pkcs11/cmd
 
 # Use the Alpine-based HSM image
-ARG BAO_VERSION=latest
 FROM openbao/openbao-hsm:${BAO_VERSION}
 
 USER root
