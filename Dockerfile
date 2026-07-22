@@ -5,7 +5,11 @@ ARG BAO_VERSION=latest
 # the Alpine base image and can dlopen the apk-installed opensc-pkcs11.so.
 # The upstream prebuilt plugin binaries are glibc-linked and unusable here.
 # Needed because the built-in pkcs11 seal is removed in OpenBao v2.7.0.
-FROM golang:1.26-alpine AS plugin-builder
+# The builder is pinned by digest so the plugin binary (and therefore the
+# sha256sum pinned in the OpenBao server config) stays identical across
+# rebuilds. Bumping this digest or KMS_PKCS11_VERSION changes the binary:
+# refresh the sha256sum pin in the deployment alongside.
+FROM golang:1.26-alpine@sha256:0178a641fbb4858c5f1b48e34bdaabe0350a330a1b1149aabd498d0699ff5fb2 AS plugin-builder
 
 ARG KMS_PKCS11_VERSION=kms-pkcs11-v0.1.0
 

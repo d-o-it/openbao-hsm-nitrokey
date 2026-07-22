@@ -28,7 +28,12 @@ jobs:
       - name: Get latest OpenBao version
         id: get_version
         run: |
-          VERSION=$(curl -s https://api.github.com/repos/openbao/openbao/releases/latest | jq -r .tag_name | sed 's/v//')
+          VERSION=$(curl -fsSL -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/openbao/openbao/releases/latest | jq -r .tag_name | sed 's/v//')
+          if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
+            echo "Failed to resolve the latest OpenBao version" >&2
+            exit 1
+          fi
           echo "latest_version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Check if version exists in GHCR
