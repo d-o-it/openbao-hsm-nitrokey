@@ -9,6 +9,10 @@ on:
         description: 'Rebuild even if the version tag already exists in GHCR'
         type: boolean
         default: false
+      tag_suffix:
+        description: 'Suffix for the version tag (e.g. -std) to avoid overwriting a deployed tag'
+        type: string
+        default: ''
 
 jobs:
   check-and-build:
@@ -59,4 +63,4 @@ jobs:
             BAO_VERSION=${{ steps.get_version.outputs.latest_version }}
           tags: |
             ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.latest_version }}
+            ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.latest_version }}${{ inputs.tag_suffix }}

@@ -17,8 +17,9 @@ WORKDIR /src
 
 RUN CGO_ENABLED=1 go build -trimpath -o /openbao-plugin-kms-pkcs11 ./kms/pkcs11/cmd
 
-# Use the Alpine-based HSM image
-FROM openbao/openbao-hsm:${BAO_VERSION}
+# Standard distribution: the HSM distribution is discontinued (removed in
+# v2.7.0) and all PKCS#11 seal work happens in the bundled plugin above.
+FROM openbao/openbao:${BAO_VERSION}
 
 USER root
 
